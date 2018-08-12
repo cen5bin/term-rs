@@ -18,6 +18,8 @@ impl<F> Terminal<F>
     pub fn run(process: F) {
         let window = initscr();
         window.keypad(true);
+        window.scrollok(true);
+        window.setscrreg(0, window.get_max_y());
         noecho();
         let mut t = Terminal {
             prompt: "debug> ".to_owned(),
@@ -47,13 +49,7 @@ impl<F> Terminal<F>
                 match ch {
                     Input::Character(c) => {
                         match c {
-                            '\n' => {
-                                let ret = String::from_utf8(self.buf.clone()).unwrap();
-                                self.clear_line();
-                                self.window.printw(format!("{}\n", ret));
-                                self.history.add_command(ret.clone());
-                                return ret;
-                            }
+                            '\n' => { return self.line_feed(); }
                             '\t' => {}
                             '\u{7f}' => { self.backspace(); }
                             '\u{15}' => {
@@ -84,6 +80,16 @@ impl<F> Terminal<F>
                 }
             }
         }
+    }
+
+    fn line_feed(&mut self) -> String {
+        let ret = String::from_utf8(self.buf.clone()).unwrap();
+        self.clear_line();
+        self.window.printw(format!("{}\n", ret));
+        if ret.trim().len() > 0 {
+            self.history.add_command(ret.clone());
+        }
+        return ret;
     }
 
     fn prev_command(&mut self) {
