@@ -71,12 +71,13 @@ impl<F> Terminal<F>
                             _ => {}
                         }
                     }
+                    Input::KeyBackspace => {self.backspace();}
                     Input::KeyResize => { self.on_resized(); }
                     Input::KeyUp => { self.prev_command(); }
                     Input::KeyDown => { self.next_command(); }
                     Input::KeyLeft => { self.move_left(); }
                     Input::KeyRight => { self.move_right(); }
-                    _ => {}
+                    x => { println!("{:?}", x); }
                 }
             }
         }
